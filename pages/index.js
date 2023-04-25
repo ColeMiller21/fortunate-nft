@@ -48,7 +48,7 @@ export default function Home() {
         <meta charset="utf-8" />
         <meta
           name="description"
-          content="This is the meta description for your website."
+          content="Fortunate NFT is a free to mint project for the people who find themselves rekt in the crypto space. A world full of people who are only out to take advantage, this project is here to remind you that YOU ARE VALUABLE! Each piece comes with a special message to encourage you. Along with that, the metadata description is a letter to you, take a moment to read the attributes. You are all the things that your fortune says you are. I truly believe every owner was meant to receive their fortune and hopefully, you get just a brief moment of joy from it. "
         />
         <title>Fortunate NFT</title>
         <link rel="icon" href="/logo.png" type="image/x-icon" />
@@ -111,7 +111,7 @@ export default function Home() {
             )}
           </div>
         </div>
-        <footer className="min-h-[100px] flex flex-col justify-center items-center text-white font-brah text-center px-4 gap-[.5rem]">
+        <footer className="min-h-[100px] flex flex-col justify-center items-center text-white font-brah text-center px-4 gap-[.5rem] mt-[50px]">
           <span>
             Disclaimer: No discord, No twitter, No roadmap - Free Mint - Collect
             your fortune and may it come true
