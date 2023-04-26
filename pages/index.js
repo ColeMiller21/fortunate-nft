@@ -3,6 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 // import ConnectWalletButton from "../components/ConnectWalletButton";
 import {
+  useContractRead,
   useContractReads,
   usePrepareContractWrite,
   useContractWrite,
@@ -60,19 +61,20 @@ export default function Home() {
 
   const getFortune = async (tokenId) => {
     if (!tokenId) return;
-    let tokenUri = await fContract.tokenURI(Number(tokenId));
-    console.log(tokenUri);
   };
 
   const { config: publicFAFZConfig } = usePrepareContractWrite({
     ...nftConfig,
     functionName: "mint",
     args: [],
-    // enabled: Boolean(tokenId),
+    enabled: false,
   });
 
-  const { write: writeFAFZ, data: publicFAFZData } =
-    useContractWrite(publicFAFZConfig);
+  const {
+    write: writeFAFZ,
+    data: publicFAFZData,
+    error,
+  } = useContractWrite(publicFAFZConfig);
 
   const { isLoading, isSuccess, isError } = useWaitForTransaction({
     hash: publicFAFZData?.hash,
@@ -145,24 +147,20 @@ export default function Home() {
               Max 1 per wallet
             </span>
           </div>
-          {/* {isConnected && mintedToken ? (
+          {isConnected && mintedToken ? (
             <span className="font-brah text-white text-[2rem] text-center">
               Already minted with this wallet
             </span>
-          ) : ( */}
-          <ConnectWalletButton loading={isLoading} onMint={handleMint} />
-          {/* )} */}
+          ) : (
+            <ConnectWalletButton loading={isLoading} onMint={handleMint} />
+          )}
 
           {isSuccess && (
             <span className="font-brah text-white">
               Successfully Minted Token!
             </span>
           )}
-          {isError && (
-            <span className="font-brah text-[#ff0000]">
-              Error minting token please try again
-            </span>
-          )}
+          {isError && <span className="font-brah text-[#ff0000]">{error}</span>}
           {mintedToken && (
             <div>
               {!revealed ? (
