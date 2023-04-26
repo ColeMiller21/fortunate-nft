@@ -3,7 +3,7 @@ import { useConnectModal, useAccountModal } from "@rainbow-me/rainbowkit";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 
-const ConnectWalletButton = ({ onMint }) => {
+const ConnectWalletButton = ({ onMint, loading }) => {
   const { isConnected, address } = useAccount();
   const { openConnectModal } = useConnectModal();
   const { openAccountModal } = useAccountModal();
@@ -18,7 +18,7 @@ const ConnectWalletButton = ({ onMint }) => {
             className={`text-white text-[3rem] rounded-full w-[250px] font-brah`}
             onClick={onMint}
           >
-            MINT
+            {loading ? "MINT" : "MINTING"}
           </button>
         </div>
       ) : (

@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import ConnectWalletButton from "../components/ConnectWalletButton";
-import { useContractReads } from "wagmi";
+import {
+  useContractReads,
+  usePrepareContractWrite,
+  useContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 import { ethers } from "ethers";
 import abi from "../public/data/abi.json";
 const contract = "0x4019D203B34583b304496F0EB9e557E1B4788A7c";
@@ -12,10 +17,10 @@ export default function Home() {
   const [amountMinted, setAmountMinted] = useState();
   const [revealed, setRevealed] = useState(false);
   const handleMint = async () => {
-    console.log("mint mint");
+    write?.();
   };
 
-  const config = {
+  const nftConfig = {
     address: contract,
     abi: abi,
   };
@@ -23,15 +28,28 @@ export default function Home() {
   const { data: readData } = useContractReads({
     contracts: [
       {
-        ...config,
+        ...nftConfig,
         functionName: "totalSupply",
         watch: true,
       },
       {
-        ...config,
+        ...nftConfig,
         functionName: "maxSupply",
       },
     ],
+  });
+
+  const { config } = usePrepareContractWrite({
+    ...nftConfig,
+    functionName: "mint",
+    args: [],
+    // enabled: Boolean(tokenId),
+  });
+
+  const { write, data } = useContractWrite(config);
+
+  const { isLoading, isSuccess } = useWaitForTransaction({
+    hash: data?.hash,
   });
 
   useEffect(() => {
@@ -45,7 +63,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <meta charset="utf-8" />
+        <meta charSet="utf-8" />
         <meta
           name="description"
           content="Fortunate NFT is a free to mint project for the people who find themselves rekt in the crypto space. A world full of people who are only out to take advantage, this project is here to remind you that YOU ARE VALUABLE! Each piece comes with a special message to encourage you. Along with that, the metadata description is a letter to you, take a moment to read the attributes. You are all the things that your fortune says you are. I truly believe every owner was meant to receive their fortune and hopefully, you get just a brief moment of joy from it. "
@@ -93,7 +111,7 @@ export default function Home() {
               Max 1 per wallet
             </span>
           </div>
-          <ConnectWalletButton />
+          <ConnectWalletButton loading={isLoading} onMint={handleMint} />
           <div>
             {!revealed ? (
               <span
