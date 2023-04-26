@@ -15,6 +15,7 @@ import { ethers } from "ethers";
 import abi from "../public/data/abi.json";
 const contract = "0x00a8943B529AbE0D4df5a834ADE1D90B87b9572D";
 import dynamic from "next/dynamic";
+import axios from "axios";
 
 const ConnectWalletButton = dynamic(
   () => import("../components/ConnectWalletButton"),
@@ -32,6 +33,8 @@ export default function Home() {
   const [amountMinted, setAmountMinted] = useState(null);
   const [revealed, setRevealed] = useState(false);
   const [mintedToken, setMintedToken] = useState(null);
+  const [fortuneLoading, setFortuneLoading] = useState(false);
+  const [fortune, setFortune] = useState(null);
 
   const handleMint = async () => {
     writeFAFZ?.();
@@ -61,6 +64,20 @@ export default function Home() {
 
   const getFortune = async (tokenId) => {
     if (!tokenId) return;
+    setFortuneLoading(true);
+    let uri = `https://fafz.mypinata.cloud/ipfs/QmUAKhgkca4KNmURB6kUcxsvBc5pdwH9W1zvE6ms8Vw9Js/${tokenId}.json`;
+    try {
+      let { data } = await axios.get(uri);
+      let atts = data.attributes;
+      for (const a of atts) {
+        if (a.trait_type === "Quote") {
+          setFortune(a.value);
+        }
+      }
+      setFortuneLoading(false);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const { config: publicFAFZConfig } = usePrepareContractWrite({
@@ -174,8 +191,8 @@ export default function Home() {
                   Reveal Your Fortune
                 </span>
               ) : (
-                <span className="font-brah text-white w-[90%]">
-                  This is your fortune -your fortune teller
+                <span className="font-brah text-[#ff0000] w-[90%] text-center text-[1.5rem]">
+                  {fortuneLoading ? "Getting Fortune" : fortune}
                 </span>
               )}
             </div>
