@@ -36,9 +36,14 @@ export default function Home() {
   const [fortuneLoading, setFortuneLoading] = useState(false);
   const [fortune, setFortune] = useState(null);
   const [fortuneImg, setFortuneImg] = useState(null);
+  const [notFafzListed, setNotFafzListed] = useState(false);
 
   const handleMint = async () => {
-    mint?.();
+    try {
+      mint?.();
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const { data: readData } = useContractReads({
@@ -56,7 +61,15 @@ export default function Home() {
         ...nftConfig,
         functionName: "tokenOfOwner",
         args: [address],
-        watch: true,
+      },
+      {
+        ...nftConfig,
+        functionName: "isFafzlisted",
+        args: [address],
+      },
+      {
+        ...nftConfig,
+        functionName: "fafzMintEnabled",
       },
     ],
   });
@@ -97,8 +110,18 @@ export default function Home() {
 
   useEffect(() => {
     if (!Array.isArray(readData)) return;
-    let [mintedAmount, maxSupply, tokensOfOwner] = readData;
+    let [
+      mintedAmount,
+      maxSupply,
+      tokensOfOwner,
+      isFafzListed,
+      fafzMintEnabled,
+    ] = readData;
+    console.log({ isFafzListed, fafzMintEnabled });
     if (readData && readData.length > 0) {
+      if (fafzMintEnabled && !isFafzListed) {
+        setNotFafzListed(true);
+      }
       setAmountMinted(ethers.utils.formatUnits(mintedAmount, 0));
       setTotalSupply(ethers.utils.formatUnits(maxSupply, 0));
       tokensOfOwner && tokensOfOwner.length > 0
@@ -161,20 +184,28 @@ export default function Home() {
             <span className="font-brah text-[#ff0000] text-[1rem]">
               Max 1 per wallet
             </span>
+            <span className="text-white font-brah w-[90%] text-center">
+              This is a whitelist only mint. If you cannot mint you will need to
+              reach out to TimeCop to get put on the list. Link in footer!
+            </span>
           </div>
-          {isConnected && mintedToken ? (
-            <span className="font-brah text-white text-[2rem] text-center">
-              Already minted with this wallet
-            </span>
-          ) : (
-            <ConnectWalletButton loading={isLoading} onMint={handleMint} />
-          )}
-          {isSuccess && (
-            <span className="font-brah text-white">
-              Successfully Minted Token!
-            </span>
-          )}
-          {isError && <span className="font-brah text-[#ff0000]">{error}</span>}
+          <div>
+            {isConnected && mintedToken ? (
+              <span className="font-brah text-white text-[2rem] text-center">
+                Already minted with this wallet
+              </span>
+            ) : (
+              <ConnectWalletButton loading={isLoading} onMint={handleMint} />
+            )}
+            {isSuccess && (
+              <span className="font-brah text-white">
+                Successfully Minted Token!
+              </span>
+            )}
+            {isError && (
+              <span className="font-brah text-[#ff0000]">{error}</span>
+            )}
+          </div>
           {mintedToken && (
             <div className="w-full flex justify-center">
               {!revealed ? (
