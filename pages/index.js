@@ -35,12 +35,11 @@ export default function Home() {
   const [mintedToken, setMintedToken] = useState(null);
   const [fortuneLoading, setFortuneLoading] = useState(false);
   const [fortune, setFortune] = useState(null);
+  const [fortuneImg, setFortuneImg] = useState(null);
 
   const handleMint = async () => {
-    writeFAFZ?.();
+    mint?.();
   };
-
-  const fContract = useContract({ ...nftConfig });
 
   const { data: readData } = useContractReads({
     contracts: [
@@ -69,6 +68,7 @@ export default function Home() {
     try {
       let { data } = await axios.get(uri);
       let atts = data.attributes;
+      setFortuneImg(data.image);
       for (const a of atts) {
         if (a.trait_type === "Quote") {
           setFortune(a.value);
@@ -83,12 +83,10 @@ export default function Home() {
   const { config: publicFAFZConfig } = usePrepareContractWrite({
     ...nftConfig,
     functionName: "mint",
-    args: [],
-    enabled: false,
   });
 
   const {
-    write: writeFAFZ,
+    write: mint,
     data: publicFAFZData,
     error,
   } = useContractWrite(publicFAFZConfig);
@@ -171,7 +169,6 @@ export default function Home() {
           ) : (
             <ConnectWalletButton loading={isLoading} onMint={handleMint} />
           )}
-
           {isSuccess && (
             <span className="font-brah text-white">
               Successfully Minted Token!
@@ -179,7 +176,7 @@ export default function Home() {
           )}
           {isError && <span className="font-brah text-[#ff0000]">{error}</span>}
           {mintedToken && (
-            <div>
+            <div className="w-full flex justify-center">
               {!revealed ? (
                 <span
                   className="font-brah text-white cursor-pointer border-b-2 hover:border-b-4 transition-all duration-300 text-[1.25rem] border-[#ff0000] "
@@ -191,7 +188,12 @@ export default function Home() {
                   Reveal Your Fortune
                 </span>
               ) : (
-                <span className="font-brah text-[#ff0000] w-[90%] text-center text-[1.5rem]">
+                <span className="font-brah text-[#ff0000] w-[90%] text-center text-[1.5rem] flex flex-col items-center justify-center gap-[.5rem]">
+                  <img
+                    src={fortuneImg}
+                    alt="fortune"
+                    className="w-[150px] aspect-square"
+                  />
                   {fortuneLoading ? "Getting Fortune" : fortune}
                 </span>
               )}
