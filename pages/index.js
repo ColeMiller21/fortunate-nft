@@ -36,7 +36,6 @@ export default function Home() {
   const [fortuneLoading, setFortuneLoading] = useState(false);
   const [fortune, setFortune] = useState(null);
   const [fortuneImg, setFortuneImg] = useState(null);
-  const [notFafzListed, setNotFafzListed] = useState(false);
 
   const handleMint = async () => {
     try {
@@ -179,7 +178,7 @@ export default function Home() {
               <ConnectWalletButton loading={isLoading} onMint={handleMint} />
             )}
             {isSuccess && (
-              <span className="font-brah text-white">
+              <span className="font-brah text-white text-center">
                 Successfully Minted Token!
               </span>
             )}
