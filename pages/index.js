@@ -1,29 +1,42 @@
 import { useState, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
-import ConnectWalletButton from "../components/ConnectWalletButton";
+// import ConnectWalletButton from "../components/ConnectWalletButton";
 import {
   useContractReads,
   usePrepareContractWrite,
   useContractWrite,
   useWaitForTransaction,
+  useAccount,
+  useContract,
 } from "wagmi";
 import { ethers } from "ethers";
 import abi from "../public/data/abi.json";
-const contract = "0x4019D203B34583b304496F0EB9e557E1B4788A7c";
+const contract = "0x00a8943B529AbE0D4df5a834ADE1D90B87b9572D";
+import dynamic from "next/dynamic";
+
+const ConnectWalletButton = dynamic(
+  () => import("../components/ConnectWalletButton"),
+  { ssr: false }
+);
+
+const nftConfig = {
+  address: contract,
+  abi: abi,
+};
 
 export default function Home() {
-  const [totalSupply, setTotalSupply] = useState();
-  const [amountMinted, setAmountMinted] = useState();
+  const { address, isConnected } = useAccount();
+  const [totalSupply, setTotalSupply] = useState(null);
+  const [amountMinted, setAmountMinted] = useState(null);
   const [revealed, setRevealed] = useState(false);
+  const [mintedToken, setMintedToken] = useState(null);
+
   const handleMint = async () => {
-    write?.();
+    writeFAFZ?.();
   };
 
-  const nftConfig = {
-    address: contract,
-    abi: abi,
-  };
+  const fContract = useContract({ ...nftConfig });
 
   const { data: readData } = useContractReads({
     contracts: [
@@ -36,27 +49,44 @@ export default function Home() {
         ...nftConfig,
         functionName: "maxSupply",
       },
+      {
+        ...nftConfig,
+        functionName: "tokenOfOwner",
+        args: [address],
+        watch: true,
+      },
     ],
   });
 
-  const { config } = usePrepareContractWrite({
+  const getFortune = async (tokenId) => {
+    if (!tokenId) return;
+    let tokenUri = await fContract.tokenURI(Number(tokenId));
+    console.log(tokenUri);
+  };
+
+  const { config: publicFAFZConfig } = usePrepareContractWrite({
     ...nftConfig,
     functionName: "mint",
     args: [],
     // enabled: Boolean(tokenId),
   });
 
-  const { write, data } = useContractWrite(config);
+  const { write: writeFAFZ, data: publicFAFZData } =
+    useContractWrite(publicFAFZConfig);
 
-  const { isLoading, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+  const { isLoading, isSuccess, isError } = useWaitForTransaction({
+    hash: publicFAFZData?.hash,
   });
 
   useEffect(() => {
-    console.log({ readData });
+    if (!Array.isArray(readData)) return;
+    let [mintedAmount, maxSupply, tokensOfOwner] = readData;
     if (readData && readData.length > 0) {
-      // setAmountMinted(ethers.utils.formatUnits(readData[0], 0));
-      // setTotalSupply(ethers.utils.formatUnits(readData[1], 0));
+      setAmountMinted(ethers.utils.formatUnits(mintedAmount, 0));
+      setTotalSupply(ethers.utils.formatUnits(maxSupply, 0));
+      tokensOfOwner && tokensOfOwner.length > 0
+        ? setMintedToken(ethers.utils.formatUnits(tokensOfOwner[0], 0))
+        : setMintedToken(null);
     }
   }, [readData]);
 
@@ -106,28 +136,52 @@ export default function Home() {
             moment of joy from it. <span>Thanks! - Timecop</span>
           </p>
           <div className="flex flex-col justify-center items-center gap-[.5rem]">
-            <span>{amountMinted && { amountMinted } / { totalSupply }}</span>
+            <span className="font-brah text-[#ff0000] text-[1.5rem]">
+              {amountMinted}
+              <span className="text-white"> / </span>
+              {totalSupply}
+            </span>
             <span className="font-brah text-[#ff0000] text-[1rem]">
               Max 1 per wallet
             </span>
           </div>
+          {/* {isConnected && mintedToken ? (
+            <span className="font-brah text-white text-[2rem] text-center">
+              Already minted with this wallet
+            </span>
+          ) : ( */}
           <ConnectWalletButton loading={isLoading} onMint={handleMint} />
-          <div>
-            {!revealed ? (
-              <span
-                className="font-brah text-white cursor-pointer border-b-2 hover:border-b-4 transition-all duration-300 text-[1.25rem] border-[#ff0000] "
-                onClick={() => {
-                  setRevealed(true);
-                }}
-              >
-                Reveal Your Fortune
-              </span>
-            ) : (
-              <span className="font-brah text-white w-[90%]">
-                This is your fortune -your fortune teller
-              </span>
-            )}
-          </div>
+          {/* )} */}
+
+          {isSuccess && (
+            <span className="font-brah text-white">
+              Successfully Minted Token!
+            </span>
+          )}
+          {isError && (
+            <span className="font-brah text-[#ff0000]">
+              Error minting token please try again
+            </span>
+          )}
+          {mintedToken && (
+            <div>
+              {!revealed ? (
+                <span
+                  className="font-brah text-white cursor-pointer border-b-2 hover:border-b-4 transition-all duration-300 text-[1.25rem] border-[#ff0000] "
+                  onClick={async () => {
+                    setRevealed(true);
+                    await getFortune(mintedToken);
+                  }}
+                >
+                  Reveal Your Fortune
+                </span>
+              ) : (
+                <span className="font-brah text-white w-[90%]">
+                  This is your fortune -your fortune teller
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <footer className="min-h-[100px] flex flex-col justify-center items-center text-white font-brah text-center px-4 gap-[.5rem] mt-[50px]">
           <span>
