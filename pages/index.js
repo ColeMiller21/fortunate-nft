@@ -189,7 +189,7 @@ export default function Home() {
               reach out to TimeCop to get put on the list. Link in footer!
             </span>
           </div>
-          <div>
+          <div className="my-[.5rem]">
             {isConnected && mintedToken ? (
               <span className="font-brah text-white text-[2rem] text-center">
                 Already minted with this wallet
