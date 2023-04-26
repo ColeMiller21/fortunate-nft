@@ -13,7 +13,7 @@ import {
 } from "wagmi";
 import { ethers } from "ethers";
 import abi from "../public/data/abi.json";
-const contract = "0x00a8943B529AbE0D4df5a834ADE1D90B87b9572D";
+const contract = "0x211ecb4FD642De91eB6A751b8529CDFf46d27457";
 import dynamic from "next/dynamic";
 import axios from "axios";
 
@@ -62,15 +62,6 @@ export default function Home() {
         functionName: "tokenOfOwner",
         args: [address],
       },
-      {
-        ...nftConfig,
-        functionName: "isFafzlisted",
-        args: [address],
-      },
-      {
-        ...nftConfig,
-        functionName: "fafzMintEnabled",
-      },
     ],
   });
 
@@ -110,18 +101,8 @@ export default function Home() {
 
   useEffect(() => {
     if (!Array.isArray(readData)) return;
-    let [
-      mintedAmount,
-      maxSupply,
-      tokensOfOwner,
-      isFafzListed,
-      fafzMintEnabled,
-    ] = readData;
-    console.log({ isFafzListed, fafzMintEnabled });
+    let [mintedAmount, maxSupply, tokensOfOwner] = readData;
     if (readData && readData.length > 0) {
-      if (fafzMintEnabled && !isFafzListed) {
-        setNotFafzListed(true);
-      }
       setAmountMinted(ethers.utils.formatUnits(mintedAmount, 0));
       setTotalSupply(ethers.utils.formatUnits(maxSupply, 0));
       tokensOfOwner && tokensOfOwner.length > 0
