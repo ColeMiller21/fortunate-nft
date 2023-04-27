@@ -13,7 +13,6 @@ import {
 } from "wagmi";
 import { ethers } from "ethers";
 import abi from "../public/data/abi.json";
-const contract = "0x211ecb4FD642De91eB6A751b8529CDFf46d27457";
 import dynamic from "next/dynamic";
 import axios from "axios";
 
@@ -21,6 +20,8 @@ const ConnectWalletButton = dynamic(
   () => import("../components/ConnectWalletButton"),
   { ssr: false }
 );
+
+const contract = "0x3E136D36C8431dc14D26E082BA754083348B9e68";
 
 const nftConfig = {
   address: contract,
