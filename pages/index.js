@@ -21,7 +21,7 @@ const ConnectWalletButton = dynamic(
   { ssr: false }
 );
 
-const contract = "0x3E136D36C8431dc14D26E082BA754083348B9e68";
+const contract = "0x2C1aD0Ffac9584BD1B1E051baFd3e61715D588eB";
 
 const nftConfig = {
   address: contract,
